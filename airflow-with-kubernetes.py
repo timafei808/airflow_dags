@@ -1,20 +1,24 @@
-from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import KubernetesPodOperator
-from datetime import datetime
 from airflow import DAG
+from airflow.operators.python import PythonOperator
+from datetime import datetime
 
+# Функция, которая будет выполняться в таске
+def print_hello():
+    print("Hello from Airflow!")
+
+# Определяем DAG
 with DAG(
-    dag_id="airflow-with-kubernetes",
-    schedule=None,
-    start_date=datetime.now(),
-    catchup=False,
-    tags=["example"],
+    dag_id="example_dag",  # Название DAG
+    start_date=datetime(2024, 1, 1),  # Дата начала
+    schedule_interval="@daily",  # Запуск каждый день
+    catchup=False,  # Отключаем ретроактивные запуски
 ) as dag:
-  airflow_with_kubernetes = KubernetesPodOperator(
-    name="kubernetes_operator", 
-    image="alekseyolg/airflow-with-kubernetes:v1.0",
-    cmds=["python"],
-    arguments=["first-script.py"],
-    task_id="run-pod-with-kubernetes",
-)
 
-airflow_with_kubernetes.dry_run()
+    # Определяем таску
+    task = PythonOperator(
+        task_id="print_hello",  # Название таски
+        python_callable=print_hello,  # Функция, которая выполнится
+    )
+
+    task  # Запускаем таску
+
